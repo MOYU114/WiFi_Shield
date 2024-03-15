@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 def reshape_and_average(x):
     num_rows = x.shape[0]
     averaged_data = np.zeros((num_rows, 50))
-    for i in range(num_rows):
+    for i in trange(num_rows):
         row_data = x.iloc[i].to_numpy()
         reshaped_data = row_data.reshape(-1, 50)
         reshaped_data = pd.DataFrame(reshaped_data).replace({None: np.nan}).values
