@@ -127,3 +127,11 @@ def csi_data_preprocess(bb):
     CSI_train = bb.values.astype('float32')
     CSI_train = CSI_train / np.max(CSI_train)
     return CSI_train
+
+def cal_avg(alp_CSI):
+    num_rows = alp_CSI.shape[0]
+    averaged_data = np.zeros((num_rows, 1))
+    for i in trange(num_rows):
+        row_data = alp_CSI.iloc[i].to_numpy().astype('float64')
+        averaged_data[i] = np.nanmean(row_data)
+    return averaged_data
