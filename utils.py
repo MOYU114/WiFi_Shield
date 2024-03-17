@@ -1,7 +1,7 @@
 import math
 import csv
 import os
-
+import logging
 from tqdm import tqdm,trange
 import torch, gc
 import torch.nn as nn
@@ -127,7 +127,7 @@ def csi_data_preprocess(bb):
     CSI_train = bb.values.astype('float32')
     CSI_train = CSI_train / np.max(CSI_train)
     return CSI_train
-
+'''
 def cal_avg(alp_CSI):
     num_rows = alp_CSI.shape[0]
     averaged_data = np.zeros((num_rows, 1))
@@ -135,3 +135,68 @@ def cal_avg(alp_CSI):
         row_data = alp_CSI.iloc[i].to_numpy().astype('float64')
         averaged_data[i] = np.nanmean(row_data)
     return averaged_data
+'''
+def cal_avg(x):
+    num_rows = x.shape[0]
+    averaged_data = np.zeros((num_rows, 1))
+    for i in trange(num_rows):
+        row_data = x.iloc[i].to_numpy()
+        reshaped_data = row_data.reshape(-1, 1)
+        reshaped_data = pd.DataFrame(reshaped_data).replace({None: np.nan}).values
+        reshaped_data = pd.DataFrame(reshaped_data).dropna().values
+        non_empty_rows = np.any(reshaped_data != '', axis=1)
+        filtered_arr = reshaped_data[non_empty_rows]
+        reshaped_data = np.asarray(filtered_arr, dtype=np.float64)
+        averaged_data[i] = np.nanmean(reshaped_data, axis=0)  # Compute column-wise average
+    averaged_df = pd.DataFrame(averaged_data, columns=None)
+    return averaged_df
+
+def cal_single_avg(x):
+    num_rows = x.shape[0]
+    averaged_data = np.zeros((num_rows, 1))
+    for i in range(num_rows):
+        row_data = x.iloc[i].to_numpy()
+        reshaped_data = row_data.reshape(-1, 1)
+        reshaped_data = pd.DataFrame(reshaped_data).replace({None: np.nan}).values
+        reshaped_data = pd.DataFrame(reshaped_data).dropna().values
+        non_empty_rows = np.any(reshaped_data != '', axis=1)
+        filtered_arr = reshaped_data[non_empty_rows]
+        reshaped_data = np.asarray(filtered_arr, dtype=np.float64)
+        averaged_data[i] = np.nanmean(reshaped_data, axis=0)  # Compute column-wise average
+    averaged_df = pd.DataFrame(averaged_data, columns=None)
+    return np.nanmean(averaged_df.iloc[0].to_numpy().astype('float64'))
+
+def logger_config(log_path,logging_name):
+    '''
+    配置log
+    :param log_path: 输出log路径
+    :param logging_name: 记录中name，可随意
+    :return:
+    '''
+    '''
+    logger是日志对象，handler是流处理器，console是控制台输出（没有console也可以，将不会在控制台输出，会在日志文件中输出）
+    使用：
+    logger = logger_config(log_path='xxx', logging_name='xxx')
+    logger.info("info")
+    logger.error("error")
+    logger.debug("debug")
+    logger.warning("warning")
+    '''
+    # 获取logger对象,取名
+    logger = logging.getLogger(logging_name)
+    # 输出DEBUG及以上级别的信息，针对所有输出的第一层过滤
+    logger.setLevel(level=logging.DEBUG)
+    # 获取文件日志句柄并设置日志级别，第二层过滤
+    handler = logging.FileHandler(log_path, encoding='UTF-8')
+    handler.setLevel(logging.INFO)
+    # 生成并设置文件日志格式
+    #formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    # console相当于控制台输出，handler文件输出。获取流句柄并设置日志级别，第二层过滤
+    console = logging.StreamHandler()
+    console.setLevel(logging.DEBUG)
+    # 为logger对象添加句柄
+    logger.addHandler(handler)
+    logger.addHandler(console)
+    return logger
