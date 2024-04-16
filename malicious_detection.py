@@ -12,8 +12,6 @@ import matplotlib.pyplot as plt
 import time
 import threading
 
-
-
 class detection_proc:
 
     device = torch.device('cpu')
@@ -46,8 +44,7 @@ class detection_proc:
         aa = pd.DataFrame(data1)  # 读取CSI数据到aa
         return aa
 
-    def updateThreshold(self,HISTORY_CSI_LOG_PATH):
-        '需要一个时间函数，去判断是否到了更新数据的阶段'
+    def updateThreshold(self,aa):
         # calculate CSI_avg
         print("update threshold.")
         '''
@@ -61,7 +58,6 @@ class detection_proc:
             CSI_avg = pd.DataFrame(data1)
         #CSI_avg = utils.reshape_and_average(aa)  # 把多个CSI数据包平均为一个数据包，使一帧对应一个CSI数据包
         '''
-        aa = self.__readCSI(HISTORY_CSI_LOG_PATH)
         CSI_avg = utils.cal_avg(aa)
         CSI_avg = CSI_avg.T.squeeze()
         CSI_avg = CSI_avg.values.astype('float32')
@@ -76,8 +72,8 @@ class detection_proc:
         # 之后考虑5min内收集多少行数据，超过该数据则要对history数据清理
         aa.to_csv(HISTORY_CSI_LOG_PATH, header=None, index=None)
 
-    def isAlarm(self,NEW_CSI_PATH):
-        crr_aa = self.__readCSI(NEW_CSI_PATH)
+    def isAlarm(self,crr_aa):
+
         crr_CSI = utils.cal_single_avg(crr_aa)
         flag = crr_CSI > self.threshold
         return crr_CSI, flag
@@ -113,14 +109,16 @@ class detection_proc:
         t1.start()
         while(1):
             if(self.UPDATE):#每五分钟更新一次
-                self.updateThreshold(self.HISTORY_CSI_LOG_PATH)
+                aa = self.__readCSI(HISTORY_CSI_LOG_PATH)
+                self.updateThreshold(aa)
                 #lock
                 self.threadLock.acquire()
                 self.UPDATE = False
                 self.threadLock.release()
 
             if(False):#有新数据传入
-                crr_CSI,flag=self.isAlarm(self.CRR_CSI_PATH)
+                crr_aa = self.__readCSI(NEW_CSI_PATH)
+                crr_CSI,flag=self.isAlarm(crr_aa)
                 if(flag):
                     self.alarm(crr_CSI)
                 else:
@@ -129,10 +127,17 @@ class detection_proc:
             now = int(round(time.time() * 1000))
             end = time.strftime('%H:%M:%S', time.localtime(now / 1000))
             print(end)
-
+    def test(self,normal,warning):
+        a_nor=self.__readCSI(normal)
+        a_war = self.__readCSI(warning)
+        self.updateThreshold(a_nor[:1000])
+        crr_CSI, flag = self.isAlarm(a_war[:1000])
+        if (flag):
+            self.alarm(crr_CSI)
 
 if __name__ == '__main__':
-    #test1="./data/test/csi1.csv"
-    #test2="./data/test/csi2.csv"
+    warning="./data/CSI_warning.csv"
+    normal="./data/CSI_normal.csv"
     test=detection_proc()
-    test.run()
+
+    test.test(normal,warning)
