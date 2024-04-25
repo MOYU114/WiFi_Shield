@@ -136,7 +136,7 @@ def cal_avg(alp_CSI):
         averaged_data[i] = np.nanmean(row_data)
     return averaged_data
 '''
-def cal_avg(x):
+def old_cal_avg(x):
     num_rows = x.shape[0]
     averaged_data = np.zeros((num_rows, 1))
     for i in trange(num_rows):
@@ -151,6 +151,30 @@ def cal_avg(x):
     averaged_df = pd.DataFrame(averaged_data, columns=None)
     return averaged_df
 
+def cal_avg(x):
+
+    num_rows = x.shape[0]
+    averaged_data = np.zeros((num_rows, 1))
+    for i in trange(num_rows):
+        row_data = x.iloc[i].to_numpy()
+        reshaped_data = row_data.reshape(-1, 1)
+        reshaped_data = pd.DataFrame(reshaped_data).replace({None: np.nan}).values
+        reshaped_data = pd.DataFrame(reshaped_data).dropna().values
+        non_empty_rows = np.any(reshaped_data != '', axis=1)
+        filtered_arr = reshaped_data[non_empty_rows]
+        reshaped_data = np.asarray(filtered_arr, dtype=np.float64)
+        averaged_data[i] = np.nanmean(reshaped_data, axis=0)  # Compute column-wise average
+    averaged_df = pd.DataFrame(averaged_data, columns=None)
+    S = (averaged_df / np.max(averaged_df)).applymap(lambda x: 1 - x)
+    S = S.values
+
+    seq_size = 10
+    S_num_rows= len(S) // seq_size + (1 if len(S) % seq_size else 0)
+    S = S.reshape(S_num_rows, -1)
+    S_averaged_data = np.zeros((S_num_rows, 1))
+    for i in trange(S_num_rows):
+        S_averaged_data[i] = np.average(S[i])
+    return S_averaged_data
 def cal_single_avg(x):
     num_rows = x.shape[0]
     averaged_data = np.zeros((num_rows, 1))

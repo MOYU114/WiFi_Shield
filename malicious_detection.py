@@ -1,4 +1,3 @@
-import logging
 import csv
 import os
 from tqdm import tqdm,trange
@@ -42,6 +41,7 @@ class detection_proc:
             csvreader = csv.reader(csvfile)
             data1 = list(csvreader)
         aa = pd.DataFrame(data1)  # 读取CSI数据到aa
+
         return aa
 
     def updateThreshold(self,aa):
@@ -130,14 +130,23 @@ class detection_proc:
     def test(self,normal,warning):
         a_nor=self.__readCSI(normal)
         a_war = self.__readCSI(warning)
-        self.updateThreshold(a_nor[:1000])
-        crr_CSI, flag = self.isAlarm(a_war[:1000])
-        if (flag):
-            self.alarm(crr_CSI)
+        #a_nor.shape(50,-1)
+        nor_S=utils.cal_avg(a_nor)
+        war_S = utils.cal_avg(a_war)
+        plt.plot(nor_S)
+        #plt.show()
+        plt.plot(war_S)
+        plt.show()
+        print("")
+        #self.updateThreshold(a_nor[:1000])
+        #crr_CSI, flag = self.isAlarm(a_war[:1000])
+        #if (flag):
+        #    self.alarm(crr_CSI)
 
 if __name__ == '__main__':
     warning="./data/CSI_warning.csv"
     normal="./data/CSI_normal.csv"
+
     test=detection_proc()
 
     test.test(normal,warning)
