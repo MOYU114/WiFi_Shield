@@ -21,8 +21,9 @@ class detection_proc:
     es_hidden_dim = 300
     dv_output_dim = 28
     threshold = 400
-    lamb = 11
+    lamb = 2
     minute=5
+    begin_t=0
     # path
     HISTORY_CSI_LOG_PATH = "./data/static/CSI_static_6C.csv"
     CRR_CSI_PATH = "./data/static/CSI_new.csv"
@@ -35,6 +36,7 @@ class detection_proc:
     def __init__(self):
         os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        self.begin_t = int(round(time.time() * 1000))#需要跟CSI同步时间
 
     def __readCSI(self,csi_path):
         with open(csi_path, "r", encoding='utf-8-sig') as csvfile:
@@ -58,12 +60,15 @@ class detection_proc:
             CSI_avg = pd.DataFrame(data1)
         #CSI_avg = utils.reshape_and_average(aa)  # 把多个CSI数据包平均为一个数据包，使一帧对应一个CSI数据包
         '''
+
         CSI_avg = utils.cal_avg(aa)
-        CSI_avg = CSI_avg.T.squeeze()
-        CSI_avg = CSI_avg.values.astype('float32')
+        #CSI_avg = CSI_avg.T.squeeze()
+        #CSI_avg = CSI_avg.values.astype('float32')
         print("get CSI_avg")
         CSI_avg_median = np.median(CSI_avg)
+        #MAD对于数据集中异常值的处理比标准差更具有弹性，可以大大减少异常值对于数据集的影响
         CSI_avg_mad = np.median(np.abs(CSI_avg - np.median(CSI_avg)))
+        #CSI_std=np.std(CSI_avg)
         self.threshold = self.lamb * CSI_avg_mad + CSI_avg_median
     def updateHistoryLog(self,CRR_CSI_PATH,HISTORY_CSI_LOG_PATH):
         aa = self.__readCSI(HISTORY_CSI_LOG_PATH)
@@ -73,22 +78,34 @@ class detection_proc:
         aa.to_csv(HISTORY_CSI_LOG_PATH, header=None, index=None)
 
     def isAlarm(self,crr_aa):
+        begin=[]
+        end=[]
+        S = utils.cal_avg(crr_aa)
+        i =0
+        while(i<len(S)):
+            if(S[i]>=self.threshold):
+                j=i
+                while(S[j]>=self.threshold):
+                    j+=1
+                begin.append(i)
+                end.append(j)
+                i=j
+            i+=1
+        return begin,end
 
-        crr_CSI = utils.cal_single_avg(crr_aa)
-        flag = crr_CSI > self.threshold
-        return crr_CSI, flag
+    def alarm(self,begin,end):
+        #需要跟CSI同步时间
 
-    def alarm(self,crr_CSI):
-        begin_t = int(round(time.time() * 1000))
-        begin = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(begin_t / 1000))
-        # while(crr_CSI>threshold):
-        #    now = int(round(time.time() * 1000))
-        time.sleep(1)
-        now = int(round(time.time() * 1000))
-        end = time.strftime('%H:%M:%S', time.localtime(now / 1000))
-
+        time_seq=1000
         logger = utils.logger_config(log_path=self.LOG_PATH, logging_name='test')
-        logger.warning(begin + "~" + end + " 检测到有人经过。")
+        for i in range(len(begin)):
+            #seq=end[i]-begin[i]
+            # while(crr_CSI>threshold):
+            #    now = int(round(time.time() * 1000))
+            begin_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime((self.begin_t+begin[i]*time_seq) / 1000))
+            end_time = time.strftime('%H:%M:%S', time.localtime((self.begin_t+(end[i]-1)*time_seq) / 1000))
+            logger.warning(begin_time + "~" + end_time + " 检测到有人经过。")
+
     def __m2s(self,minute):
         return minute*60
     def __canUpdate(self,min):
@@ -131,17 +148,13 @@ class detection_proc:
         a_nor=self.__readCSI(normal)
         a_war = self.__readCSI(warning)
         #a_nor.shape(50,-1)
-        nor_S=utils.cal_avg(a_nor)
-        war_S = utils.cal_avg(a_war)
-        plt.plot(nor_S)
-        #plt.show()
-        plt.plot(war_S)
-        plt.show()
-        print("")
-        #self.updateThreshold(a_nor[:1000])
-        #crr_CSI, flag = self.isAlarm(a_war[:1000])
-        #if (flag):
-        #    self.alarm(crr_CSI)
+        #nor_S=utils.cal_avg(a_nor)
+        #war_S = utils.cal_avg(a_war)
+
+        self.updateThreshold(a_nor)
+        begin,end = self.isAlarm(a_war)
+        if (len(begin)>0):
+            self.alarm(begin,end)
 
 if __name__ == '__main__':
     warning="./data/CSI_warning.csv"

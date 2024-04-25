@@ -172,7 +172,7 @@ def cal_avg(x):
     S_num_rows= len(S) // seq_size + (1 if len(S) % seq_size else 0)
     S = S.reshape(S_num_rows, -1)
     S_averaged_data = np.zeros((S_num_rows, 1))
-    for i in trange(S_num_rows):
+    for i in range(S_num_rows):
         S_averaged_data[i] = np.average(S[i])
     return S_averaged_data
 def cal_single_avg(x):

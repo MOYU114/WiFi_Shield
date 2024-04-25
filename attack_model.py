@@ -8,7 +8,7 @@ import utils
 import utils_model
 
 #path
-CSI_test = "./data/static/CSI_static_6C.csv"
+CSI_test = "./data/static/CSI_warning.csv"
 Video_test = "./data/static/points_static.csv"
 MODEL_PATH = "./model/student_model.pth"
 print("load student model.")
