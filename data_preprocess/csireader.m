@@ -9,12 +9,13 @@ clear
 %
 %修改三个参数，FILENAME,csi_arr_max_length,fid1，fid2，fid3
 %% configuration
-CHIP = '4358';          % wifi chip (possible values 4339, 4358, 43455c0, 4366c0)
-BW = 20;                % bandwidth
-% PATH = 'data/3DHAR/20231230/';         % data path
-PATH = 'data/voice/20240312/';         % data path
-FILENAME = 'voice_sil_1';% capture file
-FILE = strcat(PATH,FILENAME,'.pcap');
+CHIP = '4339';          % wifi chip (possible values 4339, 4358, 43455c0, 4366c0)
+BW = 80;                % bandwidth
+ PATH = 'data/3DHAR/20231230/';         % data path
+PATH = './';         % data path
+FILENAME = 'left_arm';% capture file
+%FILE = strcat(PATH,FILENAME,'.pcap');
+FILE = './left_arm.pcap'
 FILE_end = strcat(PATH,FILENAME);
 NPKTS_MAX = 200000;       % max number of UDPs to process
 NUM_SUB = 50;               %保留的子载波个数
@@ -114,7 +115,7 @@ while (k <= n)
     k = k + 1;
 end
 csi_ampt(:,51) = timestamp;
-
+csvreader();
 % csi_buff = fftshift(csi,2);
 % csi_temp1 = abs(csi_buff(:,6:32));
 % csi_temp2 = abs(csi_buff(:,35:61));

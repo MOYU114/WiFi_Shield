@@ -215,3 +215,14 @@ class StudentModel(nn.Module):
         v_atti = self.selayer(v)
         s = self.student_decoder_ds(v_atti)
         return s
+
+class identifyModel(nn.Module):
+    def __init__(self,dv_output_dim,id_output_dim):
+        super(identifyModel, self).__init__()
+        self.l1=nn.Linear(dv_output_dim, id_output_dim, dtype=torch.double)
+        self.softmax=nn.Softmax().double()
+    def forward(self,r):
+        tt=self.l1(r)
+        res=self.softmax(tt)
+        return res
+

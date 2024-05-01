@@ -28,7 +28,6 @@ class detection_proc:
     HISTORY_CSI_LOG_PATH = "./data/static/CSI_static_6C.csv"
     CRR_CSI_PATH = "./data/static/CSI_new.csv"
     MODEL_OUTPUT_PATH = "./model/"
-    CSI_AVG_PATH = "./data/static/CSI_static_6C_avg.csv"
     LOG_PATH = "./output/log.txt"
     # sign
     UPDATE=True
@@ -119,7 +118,8 @@ class detection_proc:
             self.threadLock.acquire()
             self.UPDATE = True
             self.threadLock.release()
-
+    def getPoseInfo(self,begin,end,csi):
+        return
     def run(self):
         #单开一个线程计时
         t1 = threading.Thread(target=self.__canUpdate, args=(self.minute,))
@@ -157,8 +157,8 @@ class detection_proc:
             self.alarm(begin,end)
 
 if __name__ == '__main__':
-    warning="./data/CSI_warning.csv"
-    normal="./data/CSI_normal.csv"
+    warning="./data/csi_result_2.4m_apartment_c200/left_arm.csv"
+    normal="./data/csi_result_2.4m_apartment_c200/empty.csv"
 
     test=detection_proc()
 

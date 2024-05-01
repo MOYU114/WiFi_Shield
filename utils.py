@@ -168,7 +168,7 @@ def cal_avg(x):
     S = (averaged_df / np.max(averaged_df)).applymap(lambda x: 1 - x)
     S = S.values
 
-    seq_size = 10
+    seq_size = 1
     S_num_rows= len(S) // seq_size + (1 if len(S) % seq_size else 0)
     S = S.reshape(S_num_rows, -1)
     S_averaged_data = np.zeros((S_num_rows, 1))
