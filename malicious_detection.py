@@ -20,18 +20,24 @@ class detection_proc:
     es_input_dim = 10
     es_hidden_dim = 300
     dv_output_dim = 28
+    id_output_dim = 3  # 最后的标签数量
     threshold = 400
     lamb = 2
     minute=5
     begin_t=0
+    t_threshold=15
     # path
     HISTORY_CSI_LOG_PATH = "./data/static/CSI_static_6C.csv"
     CRR_CSI_PATH = "./data/static/CSI_new.csv"
-    MODEL_OUTPUT_PATH = "./model/"
+    MODEL_PATH = "./model/"
     LOG_PATH = "./output/log.txt"
+    IDENTIFY="identify_model.pth"
+    STUDENT="student_model.pth"
     # sign
     UPDATE=True
     threadLock = threading.Lock()
+
+    dic=["left","right","stand"]
     def __init__(self):
         os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -84,27 +90,52 @@ class detection_proc:
         while(i<len(S)):
             if(S[i]>=self.threshold):
                 j=i
-                while(S[j]>=self.threshold):
+                while(j<len(S) and S[j]>=self.threshold ):
                     j+=1
                 begin.append(i)
                 end.append(j)
                 i=j
             i+=1
         return begin,end
+    def getPoseInfo(self,begin,end,csi):
 
-    def alarm(self,begin,end):
+        # model
+        student_model = utils_model.StudentModel(self.dv_output_dim, self.es_input_dim, self.es_hidden_dim, self.ev_latent_dim).to(self.device)
+        student_model.load_state_dict(torch.load(self.MODEL_PATH + self.STUDENT))
+        identify_model = utils_model.identifyModel(self.dv_output_dim, self.id_output_dim).to(self.device)
+        identify_model.load_state_dict(torch.load(self.MODEL_PATH+self.IDENTIFY))
+        id_csi = csi.values
+        id_csi = id_csi[begin:end,0:50]
+        id_csi = id_csi.reshape(len(id_csi), int(len(id_csi[0]) / 10), 10)
+        id_csi = torch.from_numpy(id_csi.astype(float)).to(self.device)
+        tr = student_model(id_csi)
+        tr = tr.reshape(len(id_csi), 28)
+        tres = identify_model(tr)
+        pos = tres.argmax(dim=1)
+        pos = pos.cpu()
+        counts = np.bincount(pos)
+        # 返回众数
+        possible_pos=np.argmax(counts)
+        #tres_0 = torch.mean(tres, dim=0)
+        #possible_pos=tres_0.argmax()
+        return self.dic[possible_pos]
+    def alarm(self,csi,begin,end):
         #需要跟CSI同步时间
-
+        time_sq=[]
         time_seq=1000
         logger = utils.logger_config(log_path=self.LOG_PATH, logging_name='test')
         for i in range(len(begin)):
+            time_sq.append(end[i]-begin[i])
+            if(end[i]-begin[i]<=self.t_threshold):#驻留时间
+                continue
             #seq=end[i]-begin[i]
             # while(crr_CSI>threshold):
             #    now = int(round(time.time() * 1000))
             begin_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime((self.begin_t+begin[i]*time_seq) / 1000))
             end_time = time.strftime('%H:%M:%S', time.localtime((self.begin_t+(end[i]-1)*time_seq) / 1000))
-            logger.warning(begin_time + "~" + end_time + " 检测到有人经过。")
-
+            logger.warning(begin_time + "~" + end_time + " 检测到有人经过。动作为"+self.getPoseInfo(begin[i],end[i],csi))
+            self.t_threshold=0.8*self.t_threshold+0.2*(end[i]-begin[i])
+        print(time_sq)
     def __m2s(self,minute):
         return minute*60
     def __canUpdate(self,min):
@@ -118,8 +149,8 @@ class detection_proc:
             self.threadLock.acquire()
             self.UPDATE = True
             self.threadLock.release()
-    def getPoseInfo(self,begin,end,csi):
-        return
+
+
     def run(self):
         #单开一个线程计时
         t1 = threading.Thread(target=self.__canUpdate, args=(self.minute,))
@@ -150,15 +181,18 @@ class detection_proc:
         #a_nor.shape(50,-1)
         #nor_S=utils.cal_avg(a_nor)
         #war_S = utils.cal_avg(a_war)
-
+        #plt.hist(nor_S)
+        #plt.show()
+        #plt.hist(war_S)
+        #plt.show()
         self.updateThreshold(a_nor)
         begin,end = self.isAlarm(a_war)
         if (len(begin)>0):
-            self.alarm(begin,end)
+            self.alarm(a_war,begin,end)
 
 if __name__ == '__main__':
     warning="./data/csi_result_2.4m_apartment_c200/left_arm.csv"
-    normal="./data/csi_result_2.4m_apartment_c200/empty.csv"
+    normal="./data/csi_result_2.4m_apartment_c200/merge.csv"
 
     test=detection_proc()
 

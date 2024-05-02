@@ -76,8 +76,8 @@ for epoch in range(num_epochs):
 
     # 打印训练信息
     print(f"Total Loss: {total_loss.item():.4f}")
-print("save student model.")
-torch.save(student_model.state_dict(), MODEL_PATH+IDENTIFY)
+print("save identify model.")
+torch.save(identify_model.state_dict(), MODEL_PATH+IDENTIFY)
 
 print("test model.")
 csi_test = csi_test.reshape(len(csi_test), int(len(csi_test[0]) / 10), 10)
