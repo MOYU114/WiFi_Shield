@@ -114,18 +114,23 @@ class detection_proc:
         pos = tres.argmax(dim=1)
         pos = pos.cpu()
         counts = np.bincount(pos)
-        # 返回众数
-        possible_pos=np.argmax(counts)
+        # 返回前三个出现频率最多的数
+        #possible_pos=np.argmax(counts)
+        possible_pos = np.argsort(counts)
         #tres_0 = torch.mean(tres, dim=0)
         #possible_pos=tres_0.argmax()
-        return self.dic[possible_pos]
+        counts_sum=np.sum(counts)
+
+        res_str=self.dic[possible_pos[-1]]+":"+str(round(counts[possible_pos[-1]]/counts_sum,2))+" "\
+                +self.dic[possible_pos[-2]]+":"+str(round(counts[possible_pos[-2]]/counts_sum,2))+" "\
+                +self.dic[possible_pos[-3]]+":"+str(round(counts[possible_pos[-3]]/counts_sum,2))+" "
+        return res_str
     def alarm(self,csi,begin,end):
         #需要跟CSI同步时间
         time_sq=[]
         time_seq=1000
         logger = utils.logger_config(log_path=self.LOG_PATH, logging_name='test')
         for i in range(len(begin)):
-            time_sq.append(end[i]-begin[i])
             if(end[i]-begin[i]<=self.t_threshold):#驻留时间
                 continue
             #seq=end[i]-begin[i]
@@ -135,7 +140,7 @@ class detection_proc:
             end_time = time.strftime('%H:%M:%S', time.localtime((self.begin_t+(end[i]-1)*time_seq) / 1000))
             logger.warning(begin_time + "~" + end_time + " 检测到有人经过。动作为"+self.getPoseInfo(begin[i],end[i],csi))
             self.t_threshold=0.8*self.t_threshold+0.2*(end[i]-begin[i])
-        print(time_sq)
+
     def __m2s(self,minute):
         return minute*60
     def __canUpdate(self,min):
@@ -166,33 +171,45 @@ class detection_proc:
 
             if(False):#有新数据传入
                 crr_aa = self.__readCSI(NEW_CSI_PATH)
-                crr_CSI,flag=self.isAlarm(crr_aa)
-                if(flag):
-                    self.alarm(crr_CSI)
+                begin,end=self.isAlarm(crr_aa)
+                if (len(begin) > 0):
+                    self.alarm(a_war, begin, end)
                 else:
                     #将当前数据传入历史记录中
                     self.updateHistoryLog(self.CRR_CSI_PATH,self.HISTORY_CSI_LOG_PATH)
             now = int(round(time.time() * 1000))
             end = time.strftime('%H:%M:%S', time.localtime(now / 1000))
-            print(end)
+    def draw_plt(self,a):
+        X=[]
+        for i in range(0,600-15,5):
+            X.append(i)
+        plt.plot(X,a[3:])
+        plt.plot()
+        plt.vlines([185, 385], 0, 0.35, linestyles='dashed', colors='red')
+        plt.xlabel("time/s")
+        plt.ylabel("$\overline{S}$")
+        plt.show()
     def test(self,normal,warning):
         a_nor=self.__readCSI(normal)
         a_war = self.__readCSI(warning)
+        #画图用的，不用管
         #a_nor.shape(50,-1)
         #nor_S=utils.cal_avg(a_nor)
         #war_S = utils.cal_avg(a_war)
         #plt.hist(nor_S)
-        #plt.show()
+        #self.draw_plt(nor_S)
+
         #plt.hist(war_S)
         #plt.show()
+
         self.updateThreshold(a_nor)
         begin,end = self.isAlarm(a_war)
         if (len(begin)>0):
             self.alarm(a_war,begin,end)
 
 if __name__ == '__main__':
-    warning="./data/csi_result_2.4m_apartment_c200/left_arm.csv"
-    normal="./data/csi_result_2.4m_apartment_c200/merge.csv"
+    warning="./data/csi_result_2.4m_apartment_c200/right_arm.csv"
+    normal="./data/csi_result_2.4m_apartment_c200/nearandfar.csv"
 
     test=detection_proc()
 

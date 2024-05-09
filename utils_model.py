@@ -226,3 +226,22 @@ class identifyModel(nn.Module):
         res=self.softmax(tt)
         return res
 
+class identifyModel_new(nn.Module):
+    def __init__(self,es_input_dim,es_hidden_dim,dv_output_dim,id_output_dim):
+        super(identifyModel_new, self).__init__()
+        self.lstm = nn.LSTM(es_input_dim, es_hidden_dim, num_layers=1, batch_first=True).double()
+        self.conv = nn.Conv2d(es_hidden_dim, dv_output_dim, kernel_size=3, stride=1, padding=1).double()
+        self.l1=nn.Linear(dv_output_dim, id_output_dim, dtype=torch.double)
+        #self.l2 = nn.Linear(50, id_output_dim, dtype=torch.double)
+        self.softmax=nn.Softmax().double()
+    def forward(self,r):
+        _, (h, _)=self.lstm(r)
+        t1=h[-1]
+        t1 = t1.unsqueeze(2).unsqueeze(3)
+        t2=self.conv(t1)
+        t2=t2.squeeze()
+        t3=self.l1(t2)
+        #res=self.softmax(t2)
+        #return res
+        return self.softmax(t3)
+

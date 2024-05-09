@@ -23,8 +23,10 @@ def mergecsv(a,b):
     aa.to_csv(a, header=None, index=None)
 if __name__ == '__main__':
     head="./data/csi_result_2.4m_apartment_c200/"
-    file=["empty","empty","empty","empty","empty","empty","left_arm","right_arm","stand_far_launcher","stand_near_launcher"]
-    output="merge"
+    #file=["empty","empty","empty","empty","empty","empty","left_arm","right_arm","stand_far_launcher","stand_near_launcher"]
+    file = ["empty","stand_far_launcher","stand_near_launcher"]
+
+    output="nearandfar"
     i=1
     if os.path.exists(head + output + ".csv"):
         os.remove(head + output + ".csv")
