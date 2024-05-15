@@ -1,8 +1,6 @@
 import csv
 import os
-from tqdm import tqdm,trange
 import torch
-import torch.nn as nn
 import numpy as np
 import pandas as pd
 import utils
@@ -10,7 +8,6 @@ import utils_model
 import matplotlib.pyplot as plt
 import time
 import threading
-
 class detection_proc:
 
     device = torch.device('cpu')
@@ -20,24 +17,25 @@ class detection_proc:
     es_input_dim = 10
     es_hidden_dim = 300
     dv_output_dim = 28
-    id_output_dim = 3  # 最后的标签数量
+    id_output_dim = 5  # 最后的标签数量
     threshold = 400
     lamb = 2
     minute=5
     begin_t=0
-    t_threshold=15
+    t_threshold=1
     # path
     HISTORY_CSI_LOG_PATH = "./data/static/CSI_static_6C.csv"
     CRR_CSI_PATH = "./data/static/CSI_new.csv"
     MODEL_PATH = "./model/"
     LOG_PATH = "./output/log.txt"
-    IDENTIFY="identify_model.pth"
+    IDENTIFY="identify_model_5.pth"
     STUDENT="student_model.pth"
     # sign
     UPDATE=True
     threadLock = threading.Lock()
 
-    dic=["left","right","stand"]
+    dic = ["left_arm", "left_leg", "open", "right_arm", "right_leg"]
+    #dic=["left_arm","right_arm","stand"]
     def __init__(self):
         os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -119,12 +117,9 @@ class detection_proc:
         possible_pos = np.argsort(counts)
         #tres_0 = torch.mean(tres, dim=0)
         #possible_pos=tres_0.argmax()
-        counts_sum=np.sum(counts)
+        #counts_sum=np.sum(counts)
+        return possible_pos,counts
 
-        res_str=self.dic[possible_pos[-1]]+":"+str(round(counts[possible_pos[-1]]/counts_sum,2))+" "\
-                +self.dic[possible_pos[-2]]+":"+str(round(counts[possible_pos[-2]]/counts_sum,2))+" "\
-                +self.dic[possible_pos[-3]]+":"+str(round(counts[possible_pos[-3]]/counts_sum,2))+" "
-        return res_str
     def alarm(self,csi,begin,end):
         #需要跟CSI同步时间
         time_sq=[]
@@ -138,7 +133,13 @@ class detection_proc:
             #    now = int(round(time.time() * 1000))
             begin_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime((self.begin_t+begin[i]*time_seq) / 1000))
             end_time = time.strftime('%H:%M:%S', time.localtime((self.begin_t+(end[i]-1)*time_seq) / 1000))
-            logger.warning(begin_time + "~" + end_time + " 检测到有人经过。动作为"+self.getPoseInfo(begin[i],end[i],csi))
+            possible_pos,counts=self.getPoseInfo(begin[i], end[i], csi)
+            res_str = self.dic[possible_pos[-1]] + ":" + str(round(counts[possible_pos[-1]] / np.sum(counts), 2)) + " " \
+                      + self.dic[possible_pos[-2]] + ":" + str(round(counts[possible_pos[-2]] / np.sum(counts), 2)) + " " \
+                      + self.dic[possible_pos[-3]] + ":" + str(round(counts[possible_pos[-3]] / np.sum(counts), 2)) + " "
+
+
+            logger.warning(begin_time + "~" + end_time + " 检测到有人"+self.dic[possible_pos[-1]]+ " 前三动作占比为"+res_str)
             self.t_threshold=0.8*self.t_threshold+0.2*(end[i]-begin[i])
 
     def __m2s(self,minute):
@@ -194,13 +195,13 @@ class detection_proc:
         a_war = self.__readCSI(warning)
         #画图用的，不用管
         #a_nor.shape(50,-1)
-        #nor_S=utils.cal_avg(a_nor)
-        #war_S = utils.cal_avg(a_war)
-        #plt.hist(nor_S)
+        nor_S=utils.cal_avg(a_nor)
+        war_S = utils.cal_avg(a_war)
+        plt.hist(nor_S)
         #self.draw_plt(nor_S)
 
-        #plt.hist(war_S)
-        #plt.show()
+        plt.hist(war_S)
+        plt.show()
 
         self.updateThreshold(a_nor)
         begin,end = self.isAlarm(a_war)
@@ -208,8 +209,8 @@ class detection_proc:
             self.alarm(a_war,begin,end)
 
 if __name__ == '__main__':
-    warning="./data/csi_result_2.4m_apartment_c200/right_arm.csv"
-    normal="./data/csi_result_2.4m_apartment_c200/nearandfar.csv"
+    warning="./data/csi_result_meeting_room/right_leg.csv"
+    normal="./data/csi_result_meeting_room/empty.csv"
 
     test=detection_proc()
 

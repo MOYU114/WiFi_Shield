@@ -299,7 +299,7 @@ release/moc_mainwindow.cpp: ../../mainwindow.h \
 		C:/Work/qt/6.7.0/mingw_64/include/QtWidgets/qtabwidget.h \
 		release/moc_predefs.h \
 		C:/Work/qt/6.7.0/mingw_64/bin/moc.exe
-	C:\Work\qt\6.7.0\mingw_64\bin\moc.exe $(DEFINES) --include E:/college/log_view/log/build/Desktop_Qt_6_7_0_MinGW_64_bit-Debug/release/moc_predefs.h -IC:/Work/qt/6.7.0/mingw_64/mkspecs/win32-g++ -IE:/college/log_view/log -IC:/Work/qt/6.7.0/mingw_64/include -IC:/Work/qt/6.7.0/mingw_64/include/QtWidgets -IC:/Work/qt/6.7.0/mingw_64/include/QtGui -IC:/Work/qt/6.7.0/mingw_64/include/QtCore -I. -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -ID:/qt/Tools/mingw1120_64/x86_64-w64-mingw32/include ..\..\mainwindow.h -o release\moc_mainwindow.cpp
+	C:\Work\qt\6.7.0\mingw_64\bin\moc.exe $(DEFINES) --include E:/college/log_view/log/log/build/Desktop_Qt_6_7_0_MinGW_64_bit-Debug/release/moc_predefs.h -IC:/Work/qt/6.7.0/mingw_64/mkspecs/win32-g++ -IE:/college/log_view/log/log -IC:/Work/qt/6.7.0/mingw_64/include -IC:/Work/qt/6.7.0/mingw_64/include/QtWidgets -IC:/Work/qt/6.7.0/mingw_64/include/QtGui -IC:/Work/qt/6.7.0/mingw_64/include/QtCore -I. -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -ID:/qt/Tools/mingw1120_64/x86_64-w64-mingw32/include ..\..\mainwindow.h -o release\moc_mainwindow.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -541,9 +541,11 @@ release/main.moc: ../../main.cpp \
 		C:/Work/qt/6.7.0/mingw_64/include/QtCore/qfile.h \
 		C:/Work/qt/6.7.0/mingw_64/include/QtCore/qfiledevice.h \
 		C:/Work/qt/6.7.0/mingw_64/include/QtCore/QTextStream \
+		C:/Work/qt/6.7.0/mingw_64/include/QtWidgets/QLineEdit \
+		C:/Work/qt/6.7.0/mingw_64/include/QtWidgets/qlineedit.h \
 		release/moc_predefs.h \
 		C:/Work/qt/6.7.0/mingw_64/bin/moc.exe
-	C:\Work\qt\6.7.0\mingw_64\bin\moc.exe $(DEFINES) --include E:/college/log_view/log/build/Desktop_Qt_6_7_0_MinGW_64_bit-Debug/release/moc_predefs.h -IC:/Work/qt/6.7.0/mingw_64/mkspecs/win32-g++ -IE:/college/log_view/log -IC:/Work/qt/6.7.0/mingw_64/include -IC:/Work/qt/6.7.0/mingw_64/include/QtWidgets -IC:/Work/qt/6.7.0/mingw_64/include/QtGui -IC:/Work/qt/6.7.0/mingw_64/include/QtCore -I. -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -ID:/qt/Tools/mingw1120_64/x86_64-w64-mingw32/include ..\..\main.cpp -o release\main.moc
+	C:\Work\qt\6.7.0\mingw_64\bin\moc.exe $(DEFINES) --include E:/college/log_view/log/log/build/Desktop_Qt_6_7_0_MinGW_64_bit-Debug/release/moc_predefs.h -IC:/Work/qt/6.7.0/mingw_64/mkspecs/win32-g++ -IE:/college/log_view/log/log -IC:/Work/qt/6.7.0/mingw_64/include -IC:/Work/qt/6.7.0/mingw_64/include/QtWidgets -IC:/Work/qt/6.7.0/mingw_64/include/QtGui -IC:/Work/qt/6.7.0/mingw_64/include/QtCore -I. -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -ID:/qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -ID:/qt/Tools/mingw1120_64/x86_64-w64-mingw32/include ..\..\main.cpp -o release\main.moc
 
 compiler_uic_make_all: ui_mainwindow.h
 compiler_uic_clean:
@@ -798,6 +800,8 @@ release/main.o: ../../main.cpp C:/Work/qt/6.7.0/mingw_64/include/QtWidgets/QAppl
 		C:/Work/qt/6.7.0/mingw_64/include/QtCore/qfile.h \
 		C:/Work/qt/6.7.0/mingw_64/include/QtCore/qfiledevice.h \
 		C:/Work/qt/6.7.0/mingw_64/include/QtCore/QTextStream \
+		C:/Work/qt/6.7.0/mingw_64/include/QtWidgets/QLineEdit \
+		C:/Work/qt/6.7.0/mingw_64/include/QtWidgets/qlineedit.h \
 		release/main.moc
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\main.o ..\..\main.cpp
 

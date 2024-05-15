@@ -11,6 +11,8 @@
 #include <QString>
 #include <QFile>
 #include <QTextStream>
+#include <QLineEdit>
+
 
 struct LogEntry {
     QString level;
@@ -46,7 +48,17 @@ public:
         layout->addLayout(buttonLayout);
         layout->addWidget(logTable);
 
+        searchEdit = new QLineEdit(this); // 创建搜索框
+        searchButton = new QPushButton("搜索动作", this); // 创建搜索按钮
+
+        auto *searchLayout = new QHBoxLayout; // 创建水平布局
+        searchLayout->addWidget(searchEdit);
+        searchLayout->addWidget(searchButton);
+
+        layout->addLayout(searchLayout); // 将搜索布局添加到主布局
+
         connect(dateEdit, &QDateEdit::dateChanged, this, &LogWindow::filterLogs);
+        connect(searchButton, &QPushButton::clicked, this, &LogWindow::searchLogs);
         connect(readButton, &QPushButton::clicked, this, &LogWindow::readLogFile);
 
         // 从文件中读取日志
@@ -77,8 +89,27 @@ private slots:
         logTable->resizeColumnsToContents();
     }
 
+    void searchLogs() {
+        QString keyword = searchEdit->text().trimmed(); // 获取搜索关键词
+        QString selectedDate = dateEdit->date().toString("yyyy-MM-dd");
+        logTable->setRowCount(0); // 清空表格内容
+
+        for (auto &log : logs) {
+            QStringList parts = log.action.split(" ");
+            if (parts[0].contains(keyword, Qt::CaseInsensitive) && log.time == selectedDate) { // 不区分大小写的搜索
+                int row = logTable->rowCount();
+                logTable->insertRow(row);
+                logTable->setItem(row, 0, new QTableWidgetItem(log.level));
+                logTable->setItem(row, 1, new QTableWidgetItem(log.time));
+                logTable->setItem(row, 2, new QTableWidgetItem(log.detailedTime));
+                logTable->setItem(row, 3, new QTableWidgetItem(log.action));
+            }
+        }
+        logTable->resizeColumnsToContents();
+    }
+
     void readLogFile() {
-        logs = readLogsFromFile("C:\\Users\\Silence\\Downloads\\log_view\\log.txt");
+        logs = readLogsFromFile("E:\\college\\log_view\\log\\log\\log.txt");
         filterLogs(); // 重新筛选并显示日志
     }
 
@@ -87,6 +118,8 @@ private:
     QPushButton *readButton;
     QTableWidget *logTable;
     QList<LogEntry> logs;
+    QLineEdit *searchEdit; // 搜索框
+    QPushButton *searchButton; // 搜索按钮
 
     QList<LogEntry> readLogsFromFile(const QString &fileName) {
         QList<LogEntry> logs;
@@ -101,7 +134,7 @@ private:
                     entry.level = parts[0];
                     entry.time = parts[1].section(" ", 0, 0); // 提取日期和时间部分
                     entry.detailedTime = parts[1].section(" ", 1, 1);
-                    entry.action = parts[1].section(" ", 2, 2); // 提取动作部分
+                    entry.action = parts[1].section(" ", 2); // 提取动作部分
                     logs.append(entry);
                 }
             }

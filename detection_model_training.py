@@ -9,18 +9,18 @@ import utils_model
 from sklearn.preprocessing import OneHotEncoder
 #from keras.utils import to_categorical
 #path
-CSI_test = "./data/csi_result_2.4m_apartment_c200/train.csv"
+CSI_test = "./data/csi_result_meeting_room/train.csv"
 Video_test = "./data/static/points_static.csv"
 MODEL_PATH = "./model/"
 STUDENT = "student_model.pth"
-IDENTIFY= "identify_model.pth"
+IDENTIFY= "identify_model_5.pth"
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 print("load student model.")
 ev_latent_dim = 64
 es_input_dim = 10
 es_hidden_dim = 300
 dv_output_dim = 28
-id_output_dim=3 #最后的标签数量
+id_output_dim=5 #最后的标签数量
 
 #model
 student_model = utils_model.StudentModel(dv_output_dim, es_input_dim, es_hidden_dim, ev_latent_dim).to(device)
@@ -58,15 +58,18 @@ test_label=data[train_size:,-1]
 csi_train = csi_train.reshape(len(csi_train), int(len(csi_train[0]) / 10), 10)
 csi_train = torch.from_numpy(csi_train.astype(float)).to(device)
 encoder = OneHotEncoder()
-y = encoder.fit_transform(train_label.reshape(-1, 1)).toarray()
-y = torch.from_numpy(y).to(device)
+label = encoder.fit_transform(train_label.reshape(-1, 1)).toarray()
+label = torch.from_numpy(label).to(device)
 
 num_epochs=1000
-
+batch_size=200
 for epoch in range(num_epochs):
     optimizer.zero_grad()
-    r=student_model(csi_train)
-    r=r.reshape(len(csi_train),28)
+    random_indices = np.random.choice(len(csi_train), size=batch_size, replace=False)
+    a=csi_train[random_indices, :]
+    y=label[random_indices, :]
+    r=student_model(a)
+    r=r.reshape(batch_size,28)
     res = identify_model(r)
     total_loss = criterion1(y,res)
     # 计算梯度
