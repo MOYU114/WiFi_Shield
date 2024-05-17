@@ -165,7 +165,8 @@ def cal_avg(x):
         reshaped_data = np.asarray(filtered_arr, dtype=np.float64)
         averaged_data[i] = np.nanmean(reshaped_data, axis=0)  # Compute column-wise average
     averaged_df = pd.DataFrame(averaged_data, columns=None)
-    S = (averaged_df / np.max(averaged_df)).applymap(lambda x: 1 - x)
+    #S = (averaged_df / np.max(averaged_df)).applymap(lambda x: 1 - x)
+    S = (averaged_df / np.max(averaged_df))
     S = S.values
 
     seq_size = 1

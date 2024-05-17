@@ -9,11 +9,11 @@ import utils_model
 from sklearn.preprocessing import OneHotEncoder
 #from keras.utils import to_categorical
 #path
-CSI_test = "./data/csi_result_meeting_room/train.csv"
+CSI_test = "./data/train_all.csv"
 Video_test = "./data/static/points_static.csv"
 MODEL_PATH = "./model/"
 STUDENT = "student_model.pth"
-IDENTIFY= "identify_model_5.pth"
+IDENTIFY= "identify_model_5_new.pth"
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 print("load student model.")
 ev_latent_dim = 64
@@ -27,7 +27,7 @@ student_model = utils_model.StudentModel(dv_output_dim, es_input_dim, es_hidden_
 student_model.load_state_dict(torch.load(MODEL_PATH+STUDENT))
 identify_model=utils_model.identifyModel(dv_output_dim,id_output_dim).to(device)
 
-learning_rate = 0.01
+learning_rate = 0.001
 beta1 = 0.5
 beta2 = 0.999
 optimizer = torch.optim.Adam(identify_model.parameters(), lr=learning_rate, betas=(beta1, beta2))
@@ -62,7 +62,7 @@ label = encoder.fit_transform(train_label.reshape(-1, 1)).toarray()
 label = torch.from_numpy(label).to(device)
 
 num_epochs=1000
-batch_size=200
+batch_size=400
 for epoch in range(num_epochs):
     optimizer.zero_grad()
     random_indices = np.random.choice(len(csi_train), size=batch_size, replace=False)

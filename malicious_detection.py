@@ -28,7 +28,7 @@ class detection_proc:
     CRR_CSI_PATH = "./data/static/CSI_new.csv"
     MODEL_PATH = "./model/"
     LOG_PATH = "./output/log.txt"
-    IDENTIFY="identify_model_5.pth"
+    IDENTIFY="identify_model_5_new.pth"
     STUDENT="student_model.pth"
     # sign
     UPDATE=True
@@ -209,9 +209,9 @@ class detection_proc:
             self.alarm(a_war,begin,end)
 
 if __name__ == '__main__':
-    warning="./data/csi_result_meeting_room/right_leg.csv"
+    warning="./data/csi_result_meeting_room/left_leg2.csv"
     normal="./data/csi_result_meeting_room/empty.csv"
-
+    #csi_result_meeting_room
     test=detection_proc()
 
     test.test(normal,warning)
