@@ -115,7 +115,29 @@ while (k <= n)
     k = k + 1;
 end
 csi_ampt(:,51) = timestamp;
-csvreader();
+
+figure;
+subplot(2,1,1)
+hold on;
+for i = 1:50
+    plot(0:20, csi_phase(40:60, i)); 
+end
+title('相位变化'); 
+xlabel('数据包/个'); 
+ylabel('相位/rad'); 
+hold off;
+%figure;
+subplot(2,1,2)
+hold on;
+for i = 1:50
+    plot(0:20, csi_ampt(40:60, i));
+end
+title('幅值变化');
+xlabel('数据包/个');
+ylabel('幅值/dB');
+hold off;
+
+%csvreader();
 % csi_buff = fftshift(csi,2);
 % csi_temp1 = abs(csi_buff(:,6:32));
 % csi_temp2 = abs(csi_buff(:,35:61));
