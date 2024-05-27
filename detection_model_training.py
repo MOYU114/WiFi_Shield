@@ -25,7 +25,7 @@ id_output_dim=5 #最后的标签数量
 #model
 student_model = utils_model.StudentModel(dv_output_dim, es_input_dim, es_hidden_dim, ev_latent_dim).to(device)
 student_model.load_state_dict(torch.load(MODEL_PATH+STUDENT))
-identify_model=utils_model.identifyModel(dv_output_dim,id_output_dim).to(device)
+identify_model= utils_model.identifyModel(dv_output_dim, id_output_dim).to(device)
 
 learning_rate = 0.001
 beta1 = 0.5

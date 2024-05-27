@@ -3,8 +3,7 @@ import os
 import torch
 import numpy as np
 import pandas as pd
-import utils
-import utils_model
+import utils, utils_model
 import matplotlib.pyplot as plt
 import time
 import threading
@@ -195,7 +194,7 @@ class detection_proc:
         a_war = self.__readCSI(warning)
         #画图用的，不用管
         #a_nor.shape(50,-1)
-        nor_S=utils.cal_avg(a_nor)
+        nor_S= utils.cal_avg(a_nor)
         war_S = utils.cal_avg(a_war)
         plt.hist(nor_S)
         #self.draw_plt(nor_S)
