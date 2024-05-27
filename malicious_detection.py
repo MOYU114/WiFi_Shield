@@ -1,9 +1,11 @@
 import csv
+import math
 import os
 import torch
 import numpy as np
 import pandas as pd
-import utils, utils_model
+import utils
+import utils_model
 import matplotlib.pyplot as plt
 import time
 import threading
@@ -31,6 +33,7 @@ class detection_proc:
     STUDENT="student_model.pth"
     # sign
     UPDATE=True
+    DATA_AVAILABLE=True
     threadLock = threading.Lock()
 
     dic = ["left_arm", "left_leg", "open", "right_arm", "right_leg"]
@@ -48,7 +51,7 @@ class detection_proc:
 
         return aa
 
-    def updateThreshold(self,aa):
+    def __updateThreshold(self, aa):
         # calculate CSI_avg
         print("update threshold.")
         '''
@@ -72,14 +75,14 @@ class detection_proc:
         CSI_avg_mad = np.median(np.abs(CSI_avg - np.median(CSI_avg)))
         #CSI_std=np.std(CSI_avg)
         self.threshold = self.lamb * CSI_avg_mad + CSI_avg_median
-    def updateHistoryLog(self,CRR_CSI_PATH,HISTORY_CSI_LOG_PATH):
+    def __updateHistoryLog(self, CRR_CSI_PATH, HISTORY_CSI_LOG_PATH):
         aa = self.__readCSI(HISTORY_CSI_LOG_PATH)
         bb = self.__readCSI(CRR_CSI_PATH)
         aa=pd.concat([aa,bb], ignore_index = True)
         # 之后考虑5min内收集多少行数据，超过该数据则要对history数据清理
         aa.to_csv(HISTORY_CSI_LOG_PATH, header=None, index=None)
 
-    def isAlarm(self,crr_aa):
+    def __isAlarm(self, crr_aa):
         begin=[]
         end=[]
         S = utils.cal_avg(crr_aa)
@@ -94,7 +97,7 @@ class detection_proc:
                 i=j
             i+=1
         return begin,end
-    def getPoseInfo(self,begin,end,csi):
+    def __getPoseInfo(self, begin, end, csi):
 
         # model
         student_model = utils_model.StudentModel(self.dv_output_dim, self.es_input_dim, self.es_hidden_dim, self.ev_latent_dim).to(self.device)
@@ -119,7 +122,7 @@ class detection_proc:
         #counts_sum=np.sum(counts)
         return possible_pos,counts
 
-    def alarm(self,csi,begin,end):
+    def __alarm(self, csi, begin, end):
         #需要跟CSI同步时间
         time_sq=[]
         time_seq=1000
@@ -132,7 +135,7 @@ class detection_proc:
             #    now = int(round(time.time() * 1000))
             begin_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime((self.begin_t+begin[i]*time_seq) / 1000))
             end_time = time.strftime('%H:%M:%S', time.localtime((self.begin_t+(end[i]-1)*time_seq) / 1000))
-            possible_pos,counts=self.getPoseInfo(begin[i], end[i], csi)
+            possible_pos,counts=self.__getPoseInfo(begin[i], end[i], csi)
             res_str = self.dic[possible_pos[-1]] + ":" + str(round(counts[possible_pos[-1]] / np.sum(counts), 2)) + " " \
                       + self.dic[possible_pos[-2]] + ":" + str(round(counts[possible_pos[-2]] / np.sum(counts), 2)) + " " \
                       + self.dic[possible_pos[-3]] + ":" + str(round(counts[possible_pos[-3]] / np.sum(counts), 2)) + " "
@@ -162,21 +165,21 @@ class detection_proc:
         t1.start()
         while(1):
             if(self.UPDATE):#每五分钟更新一次
-                aa = self.__readCSI(HISTORY_CSI_LOG_PATH)
-                self.updateThreshold(aa)
+                aa = self.__readCSI(self.HISTORY_CSI_LOG_PATH)
+                self.__updateThreshold(aa)
                 #lock
                 self.threadLock.acquire()
                 self.UPDATE = False
                 self.threadLock.release()
 
-            if(False):#有新数据传入
-                crr_aa = self.__readCSI(NEW_CSI_PATH)
-                begin,end=self.isAlarm(crr_aa)
+            if(self.DATA_AVAILABLE):#有新数据传入
+                crr_aa = self.__readCSI(self.NEW_CSI_PATH)
+                begin,end=self.__isAlarm(crr_aa)
                 if (len(begin) > 0):
-                    self.alarm(a_war, begin, end)
+                    self.__alarm(crr_aa, begin, end)
                 else:
                     #将当前数据传入历史记录中
-                    self.updateHistoryLog(self.CRR_CSI_PATH,self.HISTORY_CSI_LOG_PATH)
+                    self.__updateHistoryLog(self.CRR_CSI_PATH, self.HISTORY_CSI_LOG_PATH)
             now = int(round(time.time() * 1000))
             end = time.strftime('%H:%M:%S', time.localtime(now / 1000))
     def draw_plt(self,a):
@@ -194,7 +197,7 @@ class detection_proc:
         a_war = self.__readCSI(warning)
         #画图用的，不用管
         #a_nor.shape(50,-1)
-        nor_S= utils.cal_avg(a_nor)
+        nor_S=utils.cal_avg(a_nor)
         war_S = utils.cal_avg(a_war)
         plt.hist(nor_S)
         #self.draw_plt(nor_S)
@@ -202,15 +205,20 @@ class detection_proc:
         plt.hist(war_S)
         plt.show()
 
-        self.updateThreshold(a_nor)
-        begin,end = self.isAlarm(a_war)
+        self.__updateThreshold(a_nor)
+        begin,end = self.__isAlarm(a_war)
         if (len(begin)>0):
-            self.alarm(a_war,begin,end)
+            self.__alarm(a_war, begin, end)
 
 if __name__ == '__main__':
-    warning="./data/csi_result_meeting_room/left_leg2.csv"
-    normal="./data/csi_result_meeting_room/empty.csv"
-    #csi_result_meeting_room
-    test=detection_proc()
+    TEST=True
+    if TEST:
+        warning="./data/csi_result_meeting_room/left_leg2.csv"
+        normal="./data/csi_result_meeting_room/empty.csv"
+        #csi_result_meeting_room
+        test=detection_proc()
+        test.test(normal,warning)
+    else:
+        dec=detection_proc()
+        dec.run()
 
-    test.test(normal,warning)
