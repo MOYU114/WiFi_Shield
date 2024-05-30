@@ -23,13 +23,13 @@ class detection_proc:
     lamb = 2
     minute=5
     begin_t=0
-    t_threshold=1
+    t_threshold=15
     # path
     HISTORY_CSI_LOG_PATH = "./data/static/CSI_static_6C.csv"
     CRR_CSI_PATH = "./data/static/CSI_new.csv"
     MODEL_PATH = "./model/"
     LOG_PATH = "./output/log.txt"
-    IDENTIFY="identify_model_5_new.pth"
+    IDENTIFY="identify_model_5.pth"
     STUDENT="student_model.pth"
     # sign
     UPDATE=True
@@ -195,16 +195,6 @@ class detection_proc:
     def test(self,normal,warning):
         a_nor=self.__readCSI(normal)
         a_war = self.__readCSI(warning)
-        #画图用的，不用管
-        #a_nor.shape(50,-1)
-        nor_S=utils.cal_avg(a_nor)
-        war_S = utils.cal_avg(a_war)
-        plt.hist(nor_S)
-        #self.draw_plt(nor_S)
-
-        plt.hist(war_S)
-        plt.show()
-
         self.__updateThreshold(a_nor)
         begin,end = self.__isAlarm(a_war)
         if (len(begin)>0):
@@ -213,8 +203,9 @@ class detection_proc:
 if __name__ == '__main__':
     TEST=True
     if TEST:
-        warning="./data/csi_result_meeting_room/left_leg2.csv"
-        normal="./data/csi_result_meeting_room/empty.csv"
+        #warning="./data/left_arm.csv"
+        warning="./data/example.csv"
+        normal="./data/empty.csv"
         #csi_result_meeting_room
         test=detection_proc()
         test.test(normal,warning)

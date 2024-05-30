@@ -11,11 +11,11 @@ clear
 %% configuration
 CHIP = '4339';          % wifi chip (possible values 4339, 4358, 43455c0, 4366c0)
 BW = 80;                % bandwidth
- PATH = 'data/3DHAR/20231230/';         % data path
+%PATH = 'data/3DHAR/20231230/';         % data path
 PATH = './';         % data path
-FILENAME = 'left_arm';% capture file
+FILENAME = 'example';% capture file
 %FILE = strcat(PATH,FILENAME,'.pcap');
-FILE = './empty.pcap'
+FILE = './example.pcap'
 FILE_end = strcat(PATH,FILENAME);
 NPKTS_MAX = 200000;       % max number of UDPs to process
 NUM_SUB = 50;               %保留的子载波个数
@@ -115,27 +115,31 @@ while (k <= n)
     k = k + 1;
 end
 csi_ampt(:,51) = timestamp;
+csvwrite('../data/example.csv',csi_ampt)
 
-figure;
-subplot(2,1,1)
-hold on;
-for i = 1:50
-    plot(0:20, csi_phase(40:60, i)); 
-end
-title('相位变化'); 
-xlabel('数据包/个'); 
-ylabel('相位/rad'); 
-hold off;
+
+
+
 %figure;
-subplot(2,1,2)
-hold on;
-for i = 1:50
-    plot(0:20, csi_ampt(40:60, i));
-end
-title('幅值变化');
-xlabel('数据包/个');
-ylabel('幅值/dB');
-hold off;
+%subplot(2,1,1)
+%hold on;
+%for i = 1:50
+%    plot(0:20, csi_phase(40:60, i)); 
+%end
+%title('相位变化'); 
+%xlabel('数据包/个'); 
+%ylabel('相位/rad'); 
+%hold off;
+%figure;
+%subplot(2,1,2)
+%hold on;
+%for i = 1:50
+%    plot(0:20, csi_ampt(40:60, i));
+%end
+%title('幅值变化');
+%xlabel('数据包/个');
+%ylabel('幅值/dB');
+%hold off;
 
 %csvreader();
 % csi_buff = fftshift(csi,2);

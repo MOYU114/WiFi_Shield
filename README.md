@@ -1,6 +1,6 @@
 # WiFi安防器_隐私保护的智能安全监测与防护系统
 
-参与2024年全国大学生信息安全竞赛作品赛
+2024年全国大学生信息安全竞赛作品赛
 
 ## 项目进展情况
 
@@ -11,6 +11,7 @@
 
 ## 目录说明
 
+- CSI数据存储目录：`data`
 - 数据预处理：`data_preprocess`
 - 模型训练：
   - `attack_model_training`：用于训练CSI人体骨架分析模型，可用于攻击。
@@ -20,5 +21,23 @@
 - 客户端：
   - `log`：存放Qt客户端源代码。
   - `log_boxed.exe`：Windows端的追溯审计客户端。
+- 测试：`test.bat`文件
 
-## 使用说明
+## 使用与测试说明
+
+**前提说明：**
+
+- 需要安装好matlab，并将其添加至环境变量 Path 中
+- 需要按照requirement.txt安装依赖包`pip install -r requirements.txt`
+
+**直接运行：**
+
+运行目录下`test.bat`文件进行测试。
+
+**具体过程：**
+
+1. 使用发射器与接收机进行WiFi数据包抓取，得到`example.pcap`文件。
+2. 利用`data_preprocess/csireader.m`处理脚本，获得`data/example.csv`。
+3. 运行`python3 malicious_detection.py`，数据将存储到`output/log.txt`中。
+4. 使用`log_boxed.exe`进行查看。
+
