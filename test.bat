@@ -14,10 +14,10 @@ timeout /t 10
 cd ..
 
 :: 运行第一个python脚本
-:: python3 .\malicious_detection.py
+python3 .\malicious_detection.py
 
 :: 本团队使用anaconda配置的环境，故有此行命令
-C:\Work\anaconda\envs\python_for_ai_gpu\python.exe .\malicious_detection.py
+:: C:\Work\anaconda\envs\python_for_ai_gpu\python.exe .\malicious_detection.py
 
 :: 运行log_boxed.exe程序
 .\log_boxed.exe
